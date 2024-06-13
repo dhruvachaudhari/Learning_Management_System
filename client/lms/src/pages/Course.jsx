@@ -5,13 +5,44 @@ import Questionare from '../components/Questionare';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Modules from '../components/Modules';
-
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Course = () => {
-  const { courseid } = useParams();
-  const { moduleid } = useParams();
+  const { courseid, moduleid } = useParams();
+  const id_module = Number(moduleid)
+  const [modules, setmodule] = useState([]);
+  const [lesson, setlesson] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const modules = [{
+  const fetchmodulestitle = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/course/${courseid}`)
+      console.log(response.data[1].title)
+      setmodule(response.data)
+
+    } catch (err) { console.log(err) }
+  }
+
+  useEffect(() => {
+    fetchmodulestitle()
+  }, [courseid])
+
+
+  const fetchlesson = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/course/${courseid}/${moduleid}`)
+      console.log(response.data)
+      setlesson(response.data)
+      setLoading(false);
+    } catch (err) { console.log(err) }
+  }
+
+  useEffect(() => {
+    fetchlesson()
+  }, [moduleid])
+
+  const module = [{
     id: 1,
     title: "First",
     url: "<https://youtu.be/qYBIJwsjLLE?si=lq39g6ndED6EHLh2"
@@ -61,6 +92,8 @@ const Course = () => {
     ,
 
   ]
+
+  // const selectedModule = modules[id_module - 1];
   return (
     <div className="flex h-dvh w-full bg-blue_dark text-text-white  ">
 
@@ -73,7 +106,7 @@ const Course = () => {
         <div className='flex flex-col gap-5 '>
           {modules.map((lesson, index) => {
             return (
-              <Link to={`/course/${courseid}/module/${index + 1}`}>
+              <Link key={index} to={`/course/${courseid}/module/${index + 1}`}>
                 <div key={index} className='hover:border hover:border-white hover:text-white p-3 text-balance text-justify'>
                   <li>{lesson.title}</li>
                 </div>
@@ -93,12 +126,19 @@ const Course = () => {
 
       </aside>
 
-      {/* Main Content Area */}
+
       <main className="flex-grow h-auto flex flex-col  m-10 overflow-x-auto scroll-smooth ">
 
-        {moduleid === null ? (<Modules modules={modules[0]} />) : (<Modules modules={modules[moduleid]} />)}
 
 
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+
+            <Modules modules={lesson} />
+          </>
+        )}
 
       </main>
 

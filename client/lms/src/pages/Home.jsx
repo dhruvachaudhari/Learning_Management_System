@@ -1,8 +1,31 @@
 import React from 'react'
 import Courseblog from '../components/Courseblog'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
+import { useState, useEffect } from 'react'
 
 const Home = () => {
+    const [courses, setCourses] = useState([])
+
+    const fetchCourses = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/api/courses')
+            // .then((data) => { setCourses(data.data) }) // Adjust the URL as needed
+            console.log(response.data)
+
+            setCourses(response.data)
+
+        } catch (err) {
+            //   setError(err.message);
+            //   setLoading(false);
+            console.log(err.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchCourses();
+    }, [])
+
 
     const course = [
         {
@@ -41,13 +64,14 @@ const Home = () => {
 
             <h1 className=' text-[30px] mb-2'>Courses</h1>
             <div className='flex flex-row flex-wrap gap-10 '>
-                {course.map((course, index) => {
+                {courses.map((course, index) => {
                     return (
-                        <Link to={`/course/${course.id}/module/0`}>
-                            <Courseblog key={index} course={course} />
-                        </Link>
+                        <div key={index}>
+                            <Link to={`/course/${course.id}/module/1`}>
+                                <Courseblog course={course} />
+                            </Link>
 
-
+                        </div>
                     );
                 })}
 
