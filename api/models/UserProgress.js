@@ -26,7 +26,7 @@ const UserProgress = sequelize.define('UserProgress', {
         },
     },
     completed_modules: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.JSON,
         defaultValue: 0,
     },
     total_modules: {

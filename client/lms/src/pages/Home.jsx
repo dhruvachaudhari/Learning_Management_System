@@ -10,10 +10,26 @@ const Home = () => {
     const fetchCourses = async () => {
         try {
             const response = await axios.get('http://localhost:3000/api/courses')
-            // .then((data) => { setCourses(data.data) }) // Adjust the URL as needed
+         
+            const fetchedCourses = response.data;
             console.log(response.data)
 
-            setCourses(response.data)
+            const coursesWithLessons = await Promise.all(
+                fetchedCourses.map(async (course) => {
+                    const lessonsResponse = await axios.get(`http://localhost:3000/api/course/${course.id}/modules`);
+                    const lessons = lessonsResponse.data;
+
+                    // Assuming lessons is a JSON array string, parse it
+                    const parsedLessons = typeof lessons === 'string' ? JSON.parse(lessons) : lessons;
+                    console.log(parsedLessons)
+                    return {
+                        ...course,
+                        firstLessonId: parsedLessons[0]?.id, // Assuming parsedLessons is an array and getting the first lesson's ID
+                    };
+                })
+            );
+            console.log(coursesWithLessons)
+            setCourses(coursesWithLessons)
 
         } catch (err) {
             //   setError(err.message);
@@ -21,6 +37,21 @@ const Home = () => {
             console.log(err.message);
         }
     };
+
+    // const fetchCourseLessonID = async (courseID) => {
+    //     try {
+    //         const response = await axios.get(`http://localhost:3000/api/${courseID}//modules`)
+    //         // .then((data) => { setCourses(data.data) }) // Adjust the URL as needed
+    //         console.log(response.data)
+
+    //         // setCourses(response.data)
+
+    //     } catch (err) {
+    //         //   setError(err.message);
+    //         //   setLoading(false);
+    //         console.log(err.message);
+    //     }
+    // };
 
     useEffect(() => {
         fetchCourses();
@@ -67,7 +98,7 @@ const Home = () => {
                 {courses.map((course, index) => {
                     return (
                         <div key={index}>
-                            <Link to={`/course/${course.id}/module/1`}>
+                            <Link to={`/course/${course.id}/module/${course.firstLessonId}`}>
                                 <Courseblog course={course} />
                             </Link>
 

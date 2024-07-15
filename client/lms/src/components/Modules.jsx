@@ -14,23 +14,6 @@ const Modules = ({ modules }) => {
   // const [question, setQuestion] = useState([])
 
 
-  // const questionAll = async () => {
-  //   try {
-  //     const questionsData = await axios.get(`http://localhost:3000/api/course/${courseid}/${moduleid}/ques`)
-  //     console.log(questionsData.data)
-  //     setQuestion(questionsData.data)
-  //     setLoading(true)
-  //   } catch (err) {
-  //     console.log("Module component question error", err)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   questionAll()
-  // }
-
-  //   , [moduleid])
-
   return (
     <div>
       {console.log(modules.vid_link)}
