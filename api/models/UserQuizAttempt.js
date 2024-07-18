@@ -38,11 +38,7 @@ const UserQuizAttempt = sequelize.define('UserQuizAttempt', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    reattempt: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    attempt_date: {
+       attempt_date: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,

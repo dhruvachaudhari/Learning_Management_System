@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactPlayer from 'react-player';
-import photo from "C:/Users/Dhruva/Pictures/440142_black and white eagle ___ _xl-1024-v1-0.png"
 import Questionare from '../components/Questionare';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';

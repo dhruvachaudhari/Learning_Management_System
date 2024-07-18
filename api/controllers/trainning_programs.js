@@ -97,138 +97,45 @@ export const questionare = async (req, res) => {
 export const quizSubmit = async (req, res) => {
 
 
-    // const userID = 1;
-    // const { resourceId, programId, score, maxScore } = req.body;
-
-    // try {
-
-    //     let userQuizAttempt = await UserQuizAttempt.findOne({
-    //         where: {
-    //             user_id: userID,
-    //             program_id: programId,
-    //             resource_id: resourceId
-    //         }
-    //     });
 
 
-    //     if (userQuizAttempt) {
-
-    //         await userQuizAttempt.update({ score });
-    //         console.log("UserQuizAttempt record updated:", userQuizAttempt.id);
-    //     } else {
-
-    //         userQuizAttempt = await UserQuizAttempt.create({
-    //             user_id: userID,
-    //             program_id: programId,
-    //             resource_id: resourceId,
-    //             score
-    //         });
-    //         console.log("UserQuizAttempt record created:", userQuizAttempt.id);
-    //     }
-
-    //     if (score === maxScore) {
-
-    //         let progress = await UserProgress.findOne({
-    //             where: {
-    //                 user_id: userID,
-    //                 program_id: programId
-    //             }
-    //         });
-    //         console.log("Prblem in finding userprogress")
-
-    //         if (progress) {
-
-
-    //             const alreadyCompleted = await UserQuizAttempt.findOne({
-    //                 where: {
-    //                     user_id: userID,
-    //                     program_id: programId,
-    //                     resource_id: resourceId,
-    //                     score: maxScore
-    //                 }
-    //             });
-
-    //             if (alreadyCompleted) {
-    //                 progress.completed_modules += 1;
-    //             }
-    //             if (progress.total_modules === progress.completed_modules) {
-    //                 progress.is_completed = true;
-    //             }
-    //             console.log("UserProgress updated:", progress.id);
-    //             await progress.save();
-    //         } else {
-    //             // Create new user progress if it doesn't exist
-    //             const totalModules = await LearningResource.count({
-    //                 where: { trainning_id: programId }
-    //             });
-
-    //             UserProgress.create({
-    //                 user_id: userID,
-    //                 program_id: programId,
-    //                 completed_modules: 1,
-    //                 total_modules: totalModules,
-    //                 is_completed: totalModules === 1
-    //             });
-    //             console.log("UserProgress created:", progress.id);
-    //         }
-    //     }
-
-    //     // Respond with success message
-    //     res.status(200).json({ message: 'Quiz submitted successfully' });
-    // } catch (err) {
-    //     // Handle errors
-    //     console.error('Error submitting quiz', err);
-    //     res.status(500).json({ error: 'Error submitting quiz' });
-    // }
-
-
-    const userID = 1;
+    const userID = 1; // Replace with actual user ID from session or token
     const { resourceId, programId, score, maxScore } = req.body;
-    const percen = score % maxScore
 
     try {
-        // Find or create UserQuizAttempt record
+        // Find or create UserQuizAttempt
         let userQuizAttempt = await UserQuizAttempt.findOne({
             where: {
                 user_id: userID,
                 program_id: programId,
-                resource_id: resourceId
-            }
+                resource_id: resourceId,
+            },
         });
 
         if (userQuizAttempt) {
-            let newReattempt = userQuizAttempt.reattempt
-
-
-            await userQuizAttempt.update({
-                score: score,
-                reattempt: newReattempt + 1
-            });
-            await userQuizAttempt.save();
+            await userQuizAttempt.update({ score });
             console.log("UserQuizAttempt record updated:", userQuizAttempt.id);
         } else {
             userQuizAttempt = await UserQuizAttempt.create({
                 user_id: userID,
                 program_id: programId,
                 resource_id: resourceId,
-                score: score,
-                reattempt: 0
-
+                score,
             });
             console.log("UserQuizAttempt record created:", userQuizAttempt.id);
         }
 
-        // If the score is full, update the user progress
+        // Only update UserProgress if the score is perfect
         if (score === maxScore) {
             let progress = await UserProgress.findOne({
                 where: {
                     user_id: userID,
-                    program_id: programId
-                }
+                    program_id: programId,
+                },
             });
 
             if (progress) {
-                const completedModules = JSON.parse(progress.completed_modules || '[]');
+                let completedModules = JSON.parse(progress.completed_modules || '[]');
 
                 if (!completedModules.includes(resourceId)) {
                     completedModules.push(resourceId);
@@ -243,54 +150,29 @@ export const quizSubmit = async (req, res) => {
                 await progress.save();
                 console.log("UserProgress updated:", progress.id);
             } else {
-                // Create new user progress if it doesn't exist
                 const totalModules = await LearningResource.count({
-                    where: { trainning_id: programId }
+                    where: { trainning_id: programId },
                 });
-
-                const completedModules = JSON.stringify([resourceId]);
-                const isCompleted = totalModules === 1;
 
                 progress = await UserProgress.create({
                     user_id: userID,
                     program_id: programId,
-                    completed_modules: completedModules,
+                    completed_modules: JSON.stringify([resourceId]),
                     total_modules: totalModules,
-                    is_completed: isCompleted
+                    is_completed: totalModules === 1,
                 });
-
                 console.log("UserProgress created:", progress.id);
             }
         }
 
-        // Respond with success message
         res.status(200).json({ message: 'Quiz submitted successfully' });
     } catch (err) {
-        // Handle errors
         console.error('Error submitting quiz', err);
         res.status(500).json({ error: 'Error submitting quiz' });
     }
 };
 
-export const quizReattempt = async (req, res) => {
 
-
-    const userID = 1;
-    const { resourceId, programId } = req.body;
-
-    try {
-        const response = await UserQuizAttempt.findOne({
-            where: {
-                user_id: userID,
-                program_id: programId,
-                resource_id: resourceId
-            }
-        })
-
-        return res.status(200).json(response)
-    } catch (err) { }
-
-}
 
 export const completedModules = async (req, res) => {
     const userID = 1;
